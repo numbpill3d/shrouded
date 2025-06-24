@@ -1,0 +1,1132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>死神 - FOREST OF FINAL PASSAGE</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* ~~~ void constants ~~~ */
+        :root {
+            --ash-gray: #d8dbd2;
+            --bone-white: #f5f5f5;
+            --forest-black: #101510;
+            --forest-deep: #1a231a;
+            --pine-dark: #2a3a2a;
+            --moss-shadow: #324032;
+            --birch-pale: #a3a690;
+            --blood-crimson: #8b0000;
+            --soul-blue: #4a6d8c;
+            --lantern-glow: rgba(255, 170, 0, 0.4);
+            --spirit-glow: rgba(200, 255, 255, 0.3);
+            --transition-duration: 0.4s;
+            --transition-timing: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+
+        /* ~~~ membrane between worlds ~~~ */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Noto Serif JP', serif;
+            transition: all var(--transition-duration) var(--transition-timing);
+        }
+
+        @font-face {
+            font-family: 'Noto Serif JP';
+            src: url('https://fonts.gstatic.com/s/notoserifjp/v8/xn77YHs72GKoTvER4Gn3b5eMZGKLRkgfU8fEwb0.woff2') format('woff2');
+            font-display: swap;
+        }
+
+        /* ~~~ mortal vessel ~~~ */
+        body {
+            background-color: var(--forest-black);
+            color: var(--ash-gray);
+            background-image: 
+                repeating-linear-gradient(
+                    0deg,
+                    rgba(20, 30, 20, 0.15),
+                    rgba(20, 30, 20, 0.15) 1px,
+                    transparent 1px,
+                    transparent 2px
+                ),
+                radial-gradient(
+                    circle at center,
+                    transparent 0%,
+                    rgba(10, 15, 10, 0.3) 80%,
+                    rgba(0, 0, 0, 0.7) 100%
+                );
+            min-height: 100vh;
+            overflow-x: hidden;
+            cursor: default;
+            background-attachment: fixed;
+        }
+
+        #ethereal-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+
+        /* ~~~ architectural framework ~~~ */
+        .shinigami-realm {
+            display: grid;
+            grid-template-columns: minmax(200px, 1fr) minmax(500px, 3fr) minmax(200px, 1fr);
+            grid-template-rows: auto 1fr auto;
+            grid-template-areas:
+                "header header header"
+                "torii passage sutras"
+                "footer footer footer";
+            gap: 20px;
+            padding: 20px;
+            min-height: 100vh;
+            max-width: 1600px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 2;
+            opacity: 0;
+            animation: fadeIn 2s ease-out forwards;
+            animation-delay: 0.5s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ~~~ gateways and crossings ~~~ */
+        .death-header {
+            grid-area: header;
+            padding: 20px;
+            text-align: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+            backdrop-filter: blur(2px);
+        }
+
+        .torii-path {
+            grid-area: torii;
+        }
+
+        .forest-passage {
+            grid-area: passage;
+        }
+
+        .soul-sutras {
+            grid-area: sutras;
+        }
+
+        .death-footer {
+            grid-area: footer;
+            padding: 20px;
+            text-align: center;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(2px);
+        }
+
+        /* ~~~ spiritual containers ~~~ */
+        .shadow-box {
+            background-color: var(--forest-deep);
+            border: 1px solid rgba(255, 255, 255, 0.03);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            padding: 20px;
+            margin-bottom: 20px;
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border-radius: 3px;
+        }
+
+        .shadow-box:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+        }
+
+        .shadow-box::before {
+            content: "";
+            position: absolute;
+            top: -10px;
+            left: -10px;
+            right: -10px;
+            bottom: -10px;
+            background: linear-gradient(45deg, transparent 30%, rgba(255, 255, 255, 0.03) 40%, transparent 50%);
+            filter: blur(10px);
+            opacity: 0.5;
+            z-index: -1;
+            animation: shimmer 12s infinite linear;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%) translateY(-100%); }
+            100% { transform: translateX(100%) translateY(100%); }
+        }
+
+        /* ~~~ spirit text ~~~ */
+        h1, h2, h3 {
+            color: var(--bone-white);
+            font-weight: 300;
+            letter-spacing: 3px;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5em;
+            font-weight: 200;
+        }
+
+        h2 {
+            font-size: 1.8rem;
+            margin-bottom: 0.5em;
+            position: relative;
+            display: inline-block;
+        }
+
+        h2::after {
+            content: "";
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 100%;
+            height: 1px;
+            background: linear-gradient(to right, transparent, var(--blood-crimson), transparent);
+            animation: linePulse 3s infinite;
+        }
+
+        @keyframes linePulse {
+            0%, 100% { opacity: 0.7; }
+            50% { opacity: 1; }
+        }
+
+        h3 {
+            font-size: 1.3rem;
+            margin-bottom: 1em;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+            padding-bottom: 0.5em;
+        }
+
+        p {
+            margin-bottom: 1em;
+            line-height: 1.7;
+            color: var(--ash-gray);
+        }
+
+        /* ~~~ divine emblems ~~~ */
+        .shinigami-emblem {
+            font-size: 2rem;
+            margin-bottom: 20px;
+            color: var(--blood-crimson);
+            letter-spacing: 10px;
+            display: inline-block;
+            padding: 10px 30px;
+            border: 1px solid rgba(139, 0, 0, 0.3);
+            position: relative;
+            animation: emblemGlow 4s infinite alternate;
+        }
+
+        @keyframes emblemGlow {
+            0% { text-shadow: 0 0 5px rgba(139, 0, 0, 0.3); }
+            100% { text-shadow: 0 0 15px rgba(139, 0, 0, 0.6); }
+        }
+
+        .shinigami-emblem::before {
+            content: "";
+            position: absolute;
+            top: 5px;
+            left: 5px;
+            right: 5px;
+            bottom: 5px;
+            border: 1px solid rgba(139, 0, 0, 0.3);
+            pointer-events: none;
+        }
+
+        .kanji-title {
+            font-size: 3.5rem;
+            font-weight: 300;
+            color: var(--blood-crimson);
+            margin-bottom: 10px;
+            letter-spacing: 10px;
+            position: relative;
+            display: inline-block;
+            text-shadow: 0 0 10px rgba(139, 0, 0, 0.3);
+            animation: titlePulse 5s infinite alternate;
+        }
+
+        @keyframes titlePulse {
+            0% { transform: scale(1); opacity: 0.95; }
+            100% { transform: scale(1.02); opacity: 1; }
+        }
+
+        .subtitle {
+            font-size: 1rem;
+            letter-spacing: 5px;
+            color: var(--ash-gray);
+            margin-bottom: 20px;
+            font-weight: 300;
+        }
+
+        /* ~~~ navigation between realms ~~~ */
+        .soul-navigation {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+
+        .soul-link {
+            color: var(--ash-gray);
+            text-decoration: none;
+            padding: 8px 20px;
+            position: relative;
+            letter-spacing: 2px;
+            font-weight: 300;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.4s ease;
+        }
+
+        .soul-link:hover {
+            color: var(--bone-white);
+            background: rgba(139, 0, 0, 0.1);
+            border-color: rgba(139, 0, 0, 0.3);
+        }
+
+        .soul-link i {
+            margin-right: 8px;
+            font-size: 0.9em;
+        }
+
+        /* ~~~ spirit lists ~~~ */
+        .death-list {
+            list-style-type: none;
+            margin: 0 0 20px 0;
+            padding: 0;
+        }
+
+        .death-list li {
+            margin-bottom: 10px;
+            padding-left: 25px;
+            position: relative;
+            line-height: 1.6;
+            transition: transform 0.3s ease;
+        }
+
+        .death-list li:hover {
+            transform: translateX(5px);
+        }
+
+        .death-list li::before {
+            content: "•";
+            position: absolute;
+            left: 0;
+            color: var(--blood-crimson);
+            font-size: 1.5em;
+            top: -0.2em;
+        }
+
+        /* ~~~ lanterns in darkness ~~~ */
+        .spirit-lantern {
+            width: 15px;
+            height: 15px;
+            background-color: var(--lantern-glow);
+            border-radius: 50%;
+            position: absolute;
+            box-shadow: 0 0 15px var(--lantern-glow);
+            z-index: 3;
+            animation: flicker 4s infinite alternate;
+            pointer-events: none;
+        }
+
+        @keyframes flicker {
+            0%, 100% { opacity: 1; box-shadow: 0 0 15px var(--lantern-glow); }
+            50% { opacity: 0.6; box-shadow: 0 0 8px var(--lantern-glow); }
+        }
+
+        .spirit-lantern:nth-child(1) {
+            top: 10%;
+            left: 5%;
+            animation-delay: 0s;
+        }
+
+        .spirit-lantern:nth-child(2) {
+            top: 30%;
+            right: 8%;
+            animation-delay: -1s;
+        }
+
+        .spirit-lantern:nth-child(3) {
+            bottom: 20%;
+            left: 12%;
+            animation-delay: -2s;
+        }
+
+        .spirit-lantern:nth-child(4) {
+            top: 60%;
+            right: 15%;
+            animation-delay: -3s;
+        }
+
+        .spirit-lantern:nth-child(5) {
+            bottom: 40%;
+            left: 20%;
+            animation-delay: -4s;
+        }
+
+        /* ~~~ soul records ~~~ */
+        .soul-record {
+            background-color: var(--pine-dark);
+            padding: 15px;
+            margin-bottom: 15px;
+            position: relative;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+            border-left: 3px solid var(--blood-crimson);
+        }
+
+        .soul-record:hover {
+            background-color: rgba(42, 58, 42, 0.8);
+        }
+
+        .soul-name {
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: var(--bone-white);
+            display: flex;
+            align-items: center;
+        }
+
+        .soul-name i {
+            margin-right: 8px;
+            color: var(--blood-crimson);
+        }
+
+        .soul-date {
+            font-size: 0.8rem;
+            color: var(--birch-pale);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+        }
+
+        .soul-date i {
+            margin-right: 8px;
+        }
+
+        .soul-fate {
+            font-style: italic;
+        }
+
+        /* ~~~ ceremonial tabs ~~~ */
+        .ritual-tabs {
+            margin: 20px 0;
+        }
+
+        .tab-buttons {
+            display: flex;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .tab-button {
+            background: none;
+            border: none;
+            color: var(--ash-gray);
+            padding: 12px 24px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 300;
+            letter-spacing: 2px;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .tab-button::after {
+            content: "";
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            width: 100%;
+            height: 1px;
+            background-color: var(--blood-crimson);
+            transform: scaleX(0);
+            transition: transform 0.3s;
+        }
+
+        .tab-button:hover {
+            color: var(--bone-white);
+            background: rgba(42, 58, 42, 0.3);
+        }
+
+        .tab-button.active {
+            color: var(--bone-white);
+        }
+
+        .tab-button.active::after {
+            transform: scaleX(1);
+        }
+
+        .tab-content {
+            display: none;
+            padding: 20px 0;
+            animation: fadeContent 0.5s ease;
+        }
+
+        @keyframes fadeContent {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* ~~~ death gallery ~~~ */
+        .death-gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .death-image {
+            height: 150px;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.4s ease;
+        }
+
+        .death-image:hover {
+            border-color: rgba(139, 0, 0, 0.4);
+        }
+
+        .death-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            filter: sepia(0.3) contrast(1.1) grayscale(0.4);
+            transition: all 0.5s;
+        }
+
+        .death-image:hover img {
+            transform: scale(1.05);
+            filter: sepia(0) contrast(1.2) grayscale(0);
+        }
+
+        .image-caption {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            color: var(--ash-gray);
+            padding: 8px;
+            font-size: 0.8rem;
+            transform: translateY(100%);
+            transition: transform 0.3s;
+        }
+
+        .death-image:hover .image-caption {
+            transform: translateY(0);
+        }
+
+        /* ~~~ spirit manifestation ~~~ */
+        .spirit-manifestation {
+            height: 300px;
+            margin: 30px 0;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
+        }
+
+        .spirit-manifestation img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            filter: contrast(1.1) saturate(0.8) brightness(0.8);
+        }
+
+        .manifestation-caption {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
+            color: var(--bone-white);
+            padding: 30px 20px 20px;
+            font-size: 1.2rem;
+            letter-spacing: 2px;
+            text-align: center;
+            animation: captionFade 8s infinite alternate;
+        }
+
+        @keyframes captionFade {
+            0% { opacity: 0.8; }
+            100% { opacity: 1; }
+        }
+
+        /* ~~~ ethereal quote ~~~ */
+        .ethereal-quote {
+            font-style: italic;
+            padding: 30px;
+            margin: 30px 0;
+            position: relative;
+            color: var(--ash-gray);
+            font-size: 1.2rem;
+            line-height: 1.8;
+            text-align: center;
+            background: rgba(26, 35, 26, 0.5);
+            border-left: 3px solid var(--blood-crimson);
+        }
+
+        .ethereal-quote::before, .ethereal-quote::after {
+            content: """;
+            font-size: 3rem;
+            color: rgba(255, 255, 255, 0.1);
+            position: absolute;
+            font-family: Georgia, serif;
+        }
+
+        .ethereal-quote::before {
+            top: 0;
+            left: 10px;
+        }
+
+        .ethereal-quote::after {
+            content: """;
+            bottom: -20px;
+            right: 10px;
+        }
+
+        .quote-author {
+            display: block;
+            margin-top: 15px;
+            font-size: 0.9rem;
+            color: var(--birch-pale);
+            font-style: normal;
+            letter-spacing: 1px;
+        }
+
+        /* ~~~ scrollbar aesthetics ~~~ */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--forest-deep);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--moss-shadow);
+            border-radius: 0;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--blood-crimson);
+        }
+
+        /* ~~~ loading screen ~~~ */
+        .loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--forest-black);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            transition: opacity 1s ease, visibility 1s ease;
+        }
+
+        .loading-text {
+            color: var(--ash-gray);
+            font-size: 1.5rem;
+            letter-spacing: 3px;
+            margin-bottom: 20px;
+        }
+
+        .loading-bar {
+            width: 200px;
+            height: 2px;
+            background: var(--pine-dark);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .loading-bar::after {
+            content: '';
+            position: absolute;
+            height: 100%;
+            width: 50px;
+            background: var(--blood-crimson);
+            animation: loading 2s infinite ease-in-out;
+        }
+
+        @keyframes loading {
+            0% { left: -50px; }
+            100% { left: calc(100% + 50px); }
+        }
+
+        /* ~~~ responsive adjustments ~~~ */
+        @media (max-width: 900px) {
+            .shinigami-realm {
+                grid-template-columns: 1fr;
+                grid-template-areas:
+                    "header"
+                    "passage"
+                    "torii"
+                    "sutras"
+                    "footer";
+            }
+            
+            .soul-navigation {
+                gap: 15px;
+            }
+            
+            .soul-link {
+                padding: 6px 12px;
+                font-size: 0.9rem;
+            }
+            
+            .kanji-title {
+                font-size: 2.8rem;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .shinigami-emblem {
+                font-size: 1.8rem;
+                padding: 8px 20px;
+            }
+            
+            .kanji-title {
+                font-size: 2.2rem;
+                letter-spacing: 5px;
+            }
+            
+            .subtitle {
+                font-size: 0.9rem;
+            }
+            
+            .tab-button {
+                padding: 10px 15px;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading screen -->
+    <div class="loading-screen">
+        <div class="loading-text">Entering the Forest of Final Passage</div>
+        <div class="loading-bar"></div>
+    </div>
+
+    <canvas id="ethereal-canvas"></canvas>
+
+    <div class="shinigami-realm">
+        <div class="spirit-lantern"></div>
+        <div class="spirit-lantern"></div>
+        <div class="spirit-lantern"></div>
+        <div class="spirit-lantern"></div>
+        <div class="spirit-lantern"></div>
+
+        <header class="death-header">
+            <div class="shinigami-emblem">死神</div>
+            <h1 class="kanji-title">冥途の林</h1>
+            <div class="subtitle">FOREST OF FINAL PASSAGE</div>
+            
+            <nav class="soul-navigation">
+                <a href="https://nolove.neocities.org" class="soul-link"><i class="fas fa-door-open"></i> Passage</a>
+                <a href="https://numbpilled.neocities.org" class="soul-link"><i class="fas fa-scroll"></i> Records</a>
+                <a href="https://2133.lol" class="soul-link"><i class="fas fa-moon"></i> Rituals</a>
+                <a href="https://sychurn.mmm.page" class="soul-link"><i class="fas fa-balance-scale"></i> Judgment</a>
+            </nav>
+        </header>
+
+        <section class="torii-path">
+            <div class="shadow-box">
+                <h3><i class="fas fa-wind"></i> Whispers Between Worlds</h3>
+                <p>Those who enter the forest at dusk may hear echoes of names no longer spoken among the living. Listen, but do not answer.</p>
+            </div>
+
+            <div class="shadow-box">
+                <h3><i class="fas fa-map-signs"></i> Signs of Passage</h3>
+                <ul class="death-list">
+                    <li>Lanterns that flicker without wind</li>
+                    <li>Trees that bear fruit in winter</li>
+                    <li>Birds that cast no shadow</li>
+                    <li>Water that flows uphill</li>
+                    <li>Footprints that appear behind you</li>
+                </ul>
+            </div>
+
+            <div class="shadow-box">
+                <h3><i class="fas fa-hourglass-half"></i> Recent Crossings</h3>
+                <div class="soul-record">
+                    <div class="soul-name"><i class="fas fa-user-alt"></i> Akira Tanaka</div>
+                    <div class="soul-date"><i class="fas fa-calendar-day"></i> Passage: Winter Solstice</div>
+                    <div class="soul-fate">Followed the red thread through seven gates.</div>
+                </div>
+
+                <div class="soul-record">
+                    <div class="soul-name"><i class="fas fa-user-alt"></i> Mei Watanabe</div>
+                    <div class="soul-date"><i class="fas fa-calendar-day"></i> Passage: Autumn Equinox</div>
+                    <div class="soul-fate">Left offerings at the stone markers. Granted safe passage.</div>
+                </div>
+
+                <div class="soul-record">
+                    <div class="soul-name"><i class="fas fa-user-alt"></i> Hiroshi Nakamura</div>
+                    <div class="soul-date"><i class="fas fa-calendar-day"></i> Passage: Waning Crescent</div>
+                    <div class="soul-fate">Refused the guide's lantern. Current whereabouts unknown.</div>
+                </div>
+            </div>
+        </section>
+
+        <main class="forest-passage">
+            <div class="spirit-manifestation">
+                <img src="https://files.catbox.moe/cy0xj0.gif" alt="Forest of Mist">
+                <div class="manifestation-caption">The path unfolds differently for each soul</div>
+            </div>
+
+            <div class="shadow-box">
+                <h2><i class="fas fa-tree"></i> The Boundary Fades</h2>
+                <p>In the space between heartbeats, where time pools like forgotten rain, the shinigami walk. They are the custodians of transition, guardians of the threshold that separates breath from silence.</p>
+                <p>The forest is their domain—neither living nor dead, but existing in the liminal space where reality thins. Trees that have witnessed a thousand years of human suffering stand sentinel over paths that shift with the weight of karma.</p>
+                <p>Those who enter the forest with unfinished business may find themselves walking in circles, their reflections in still water showing faces they no longer recognize.</p>
+            </div>
+
+            <div class="ethereal-quote">
+                To understand death, you must first understand the beauty of impermanence. All things are borrowed—even your next breath.
+                <span class="quote-author">— From the Scrolls of Passage</span>
+            </div>
+
+            <div class="ritual-tabs">
+                <div class="tab-buttons">
+                    <button class="tab-button active" onclick="openTab(event, 'guides')"><i class="fas fa-hands-helping"></i> Guides</button>
+                    <button class="tab-button" onclick="openTab(event, 'offerings')"><i class="fas fa-gift"></i> Offerings</button>
+                    <button class="tab-button" onclick="openTab(event, 'judgments')"><i class="fas fa-gavel"></i> Judgments</button>
+                </div>
+
+                <div id="guides" class="tab-content active">
+                    <h3>Those Who Guide the Lost</h3>
+                    <p>The most merciful shinigami carry lanterns of pale blue fire. Their gaze will pierce your essence and measure the weight of your regrets.</p>
+                    <p>The silent guides appear as children wearing masks of birch bark. They will lead you to the crossroads where seven paths diverge. Choose wisely.</p>
+                    <p>The ancient ones manifest as deer with branches for antlers and moss-covered backs. They are the oldest guardians and only appear to souls of great significance.</p>
+                </div>
+
+                <div id="offerings" class="tab-content">
+                    <h3>What to Leave Behind</h3>
+                    <p>At the first torii gate, leave something that once brought you joy. This lightens the spirit for the journey ahead.</p>
+                    <p>At the stone basin, wash your hands and face with water that reflects no light. This cleanses the attachments that bind you to the mortal realm.</p>
+                    <p>At the hollow tree marked with red thread, whisper the name you wish to be called in the next life. If the forest accepts it, you will hear it echoed back.</p>
+                    <p>Never offer blood or tears. These are currencies too powerful and may attract entities that are neither guide nor guardian.</p>
+                </div>
+
+                <div id="judgments" class="tab-content">
+                    <h3>The Weight of Deeds</h3>
+                    <p>In the clearing where moonlight falls even at noon, souls are weighed against a feather from the wing of truth. Those who are lighter continue onward.</p>
+                    <p>Those heavy with unresolved karma are bound to the trees that line the misty ravine. They become the whispers that warn travelers of dangerous paths.</p>
+                    <p>The rarest souls—those who left nothing unfinished—are permitted to drink from the silver stream. They remember nothing of their mortal life but are reborn with a map of the forest etched into their palm.</p>
+                </div>
+            </div>
+
+            <div class="death-gallery">
+                <div class="death-image">
+                    <img src="https://files.catbox.moe/7qxjfd.webp" alt="Spirit Lantern">
+                    <div class="image-caption">Lanterns to guide lost souls</div>
+                </div>
+                <div class="death-image">
+                    <img src="https://files.catbox.moe/7qxjfd.webp" alt="Torii Gate">
+                    <div class="image-caption">The first of seven gates</div>
+                </div>
+                <div class="death-image">
+                    <img src="https://files.catbox.moe/7qxjfd.webp" alt="Stone Marker">
+                    <div class="image-caption">Markers of those who never left</div>
+                </div>
+                <div class="death-image">
+                    <img src="https://files.catbox.moe/7qxjfd.webp" alt="Silver Stream">
+                    <div class="image-caption">Waters of forgetting</div>
+                </div>
+            </div>
+        </main>
+
+        <section class="soul-sutras">
+            <div class="shadow-box">
+                <h3><i class="fas fa-book-dead"></i> Laws of Passage</h3>
+                <ul class="death-list">
+                    <li>Never look back once you've crossed the third gate</li>
+                    <li>Speak only when addressed directly</li>
+                    <li>Accept no gifts except from those with red-marked hands</li>
+                    <li>Leave the forest before the seventh sunset</li>
+                    <li>Remember: all paths eventually lead to judgment</li>
+                </ul>
+            </div>
+
+            <div class="shadow-box">
+                <h3><i class="fas fa-eye"></i> Keeper's Observations</h3>
+                <p>The forest has been unusually active since the comet's passing. More souls wander without guides, and the boundary between worlds thins with each passing night.</p>
+                <p>The ancient maple at the center has begun to weep a substance that is neither sap nor blood. Those who taste it speak of memories that do not belong to them.</p>
+            </div>
+
+            <div class="shadow-box">
+                <h3><i class="fas fa-skull"></i> Forbidden Knowledge</h3>
+                <p class="soul-fate">There are whispers of a hidden path that circumvents judgment entirely. Those who find it may return to the world of the living, but at a cost that few would willingly pay.</p>
+                <p class="soul-fate">The shinigami themselves are bound by laws older than the forest. They too were once travelers on these paths.</p>
+            </div>
+        </section>
+
+        <footer class="death-footer">
+            <p>May your passage be swift and your judgment merciful</p>
+            <p>死神の森を通る時、自分の影だけを頼りにしないでください</p>
+        </footer>
+    </div>
+
+    <script>
+        // Tab system functionality
+        function openTab(evt, tabName) {
+            var i, tabcontent, tabbuttons;
+            
+            tabcontent = document.getElementsByClassName("tab-content");
+            for (i = 0; i < tabcontent.length; i++) {
+                tabcontent[i].classList.remove("active");
+            }
+            
+            tabbuttons = document.getElementsByClassName("tab-button");
+            for (i = 0; i < tabbuttons.length; i++) {
+                tabbuttons[i].classList.remove("active");
+            }
+            
+            document.getElementById(tabName).classList.add("active");
+            evt.currentTarget.classList.add("active");
+        }
+
+        // Three.js Forest Background
+        function initForest() {
+            const canvas = document.getElementById('ethereal-canvas');
+            const scene = new THREE.Scene();
+            const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            const renderer = new THREE.WebGLRenderer({ 
+                canvas: canvas, 
+                alpha: true,
+                antialias: true
+            });
+            
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setClearColor(0x000000, 0);
+            renderer.setPixelRatio(window.devicePixelRatio);
+            
+            // Create forest elements
+            const treeGroup = new THREE.Group();
+            scene.add(treeGroup);
+            
+            // Create stylized "trees" as tall, thin cylinders
+            function createTree(x, z, height, radius, color) {
+                const treeGeometry = new THREE.CylinderGeometry(radius * 0.7, radius, height, 8);
+                const treeMaterial = new THREE.MeshBasicMaterial({ 
+                    color: color,
+                    transparent: true,
+                    opacity: 0.8
+                });
+                const tree = new THREE.Mesh(treeGeometry, treeMaterial);
+                
+                tree.position.set(x, height / 2, z);
+                return tree;
+            }
+            
+            // Add multiple trees to create a forest
+            const forestSize = 150;
+            const forestRange = 100;
+            const forestColors = [
+                0x2a3a2a, // pine-dark
+                0x1a231a, // forest-deep
+                0x324032, // moss-shadow
+                0x101510  // forest-black
+            ];
+            
+            for (let i = 0; i < forestSize; i++) {
+                const x = (Math.random() - 0.5) * forestRange;
+                const z = (Math.random() - 0.5) * forestRange - 30;
+                const height = 12 + Math.random() * 25;
+                const radius = 0.2 + Math.random() * 0.4;
+                const colorIndex = Math.floor(Math.random() * forestColors.length);
+                
+                const tree = createTree(x, z, height, radius, forestColors[colorIndex]);
+                treeGroup.add(tree);
+            }
+            
+            // Add fog to create depth and mystery
+            scene.fog = new THREE.FogExp2(0x101510, 0.03);
+            
+            // Position camera
+            camera.position.z = 35;
+            camera.position.y = 8;
+            
+            // Add spirit particles (fireflies/spirits)
+            const spiritGeometry = new THREE.BufferGeometry();
+            const spiritCount = 200;
+            
+            const positions = new Float32Array(spiritCount * 3);
+            const colors = new Float32Array(spiritCount * 3);
+            const sizes = new Float32Array(spiritCount);
+            
+            const blueColor = new THREE.Color(0xc8ffff);
+            const redColor = new THREE.Color(0xff5555);
+            const yellowColor = new THREE.Color(0xffff88);
+            
+            for (let i = 0; i < spiritCount; i++) {
+                const i3 = i * 3;
+                
+                // Position spirits throughout the forest
+                positions[i3] = (Math.random() - 0.5) * forestRange * 1.2;
+                positions[i3 + 1] = Math.random() * 20 + 1;
+                positions[i3 + 2] = (Math.random() - 0.5) * forestRange * 1.2 - 30;
+                
+                // Color between blue, yellow and red
+                const colorChoice = Math.random();
+                let color;
+                
+                if (colorChoice < 0.7) {
+                    color = blueColor;
+                } else if (colorChoice < 0.9) {
+                    color = yellowColor;
+                } else {
+                    color = redColor;
+                }
+                
+                colors[i3] = color.r;
+                colors[i3 + 1] = color.g;
+                colors[i3 + 2] = color.b;
+                
+                sizes[i] = 0.6 + Math.random() * 0.8;
+            }
+            
+            spiritGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+            spiritGeometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+            spiritGeometry.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
+            
+            const spiritMaterial = new THREE.PointsMaterial({
+                size: 0.8,
+                vertexColors: true,
+                transparent: true,
+                opacity: 0.8,
+                blending: THREE.AdditiveBlending,
+                sizeAttenuation: true
+            });
+            
+            const spirits = new THREE.Points(spiritGeometry, spiritMaterial);
+            scene.add(spirits);
+            
+            // Create ground plane (misty forest floor)
+            const floorGeometry = new THREE.PlaneGeometry(300, 300, 32, 32);
+            const floorMaterial = new THREE.MeshBasicMaterial({ 
+                color: 0x1a231a,
+                transparent: true,
+                opacity: 0.6,
+                side: THREE.DoubleSide
+            });
+            const floor = new THREE.Mesh(floorGeometry, floorMaterial);
+            floor.rotation.x = Math.PI / 2;
+            floor.position.y = -1;
+            scene.add(floor);
+            
+            // Add subtle ambient light
+            const ambientLight = new THREE.AmbientLight(0x333333);
+            scene.add(ambientLight);
+            
+            // Add directional moonlight
+            const moonLight = new THREE.DirectionalLight(0x4a6d8c, 0.2);
+            moonLight.position.set(10, 20, 10);
+            scene.add(moonLight);
+            
+            // Animation
+            let time = 0;
+            function animate() {
+                requestAnimationFrame(animate);
+                time += 0.01;
+                
+                // Gently rotate forest for ethereal effect
+                treeGroup.rotation.y += 0.0003;
+                
+                // Make spirits float up and down slightly
+                const positions = spirits.geometry.attributes.position.array;
+                for (let i = 0; i < spiritCount; i++) {
+                    const i3 = i * 3;
+                    positions[i3 + 1] += Math.sin(time * 2 + i * 100) * 0.015;
+                    
+                    // Random horizontal drift
+                    positions[i3] += Math.sin(time * 0.5 + i * 200) * 0.015;
+                    positions[i3 + 2] += Math.cos(time * 0.7 + i * 300) * 0.015;
+                }
+                spirits.geometry.attributes.position.needsUpdate = true;
+                
+                // Subtle camera movement
+                camera.position.y = 8 + Math.sin(time * 0.3) * 1.5;
+                camera.position.x = Math.sin(time * 0.2) * 4;
+                camera.lookAt(scene.position);
+                
+                renderer.render(scene, camera);
+            }
+            
+            animate();
+            
+            // Resize handler
+            function handleResize() {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+            }
+            
+            window.addEventListener('resize', handleResize);
+            handleResize();
+        }
+        
+        // Initialize on load
+        window.addEventListener('load', () => {
+            // Hide loading screen
+            setTimeout(() => {
+                document.querySelector('.loading-screen').style.opacity = '0';
+                document.querySelector('.loading-screen').style.visibility = 'hidden';
+                
+                // Initialize Three.js forest
+                initForest();
+                
+                // Add floating animation to lanterns
+                const lanterns = document.querySelectorAll('.spirit-lantern');
+                lanterns.forEach(lantern => {
+                    setInterval(() => {
+                        const moveX = Math.random() * 15 - 7.5;
+                        const moveY = Math.random() * 15 - 7.5;
+                        
+                        lantern.animate([
+                            { transform: 'translate(0, 0)' },
+                            { transform: `translate(${moveX}px, ${moveY}px)` }
+                        ], {
+                            duration: 8000,
+                            easing: 'ease-in-out',
+                            fill: 'forwards'
+                        });
+                    }, 12000);
+                });
+                
+                // Add parallax effect to header and footer
+                window.addEventListener('scroll', () => {
+                    const scrollY = window.scrollY;
+                    const header = document.querySelector('.death-header');
+                    const footer = document.querySelector('.death-footer');
+                    
+                    header.style.transform = `translateY(${scrollY * 0.3}px)`;
+                    footer.style.transform = `translateY(${scrollY * -0.3}px)`;
+                });
+            }, 2000);
+        });
+    </script>
+</body>
+</html>
